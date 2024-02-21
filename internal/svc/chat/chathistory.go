@@ -1,4 +1,4 @@
-package svc
+package chat
 
 import "github.com/sashabaranov/go-openai"
 

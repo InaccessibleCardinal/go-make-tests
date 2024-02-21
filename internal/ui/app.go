@@ -2,6 +2,8 @@ package ui
 
 import (
 	"go-make-tests/internal/svc"
+	"go-make-tests/internal/svc/chat"
+	"go-make-tests/internal/svc/files"
 	"log"
 	"os"
 
@@ -27,7 +29,7 @@ type FormState struct {
 	Labels       []string
 	loadingLabel *widget.Label
 	testGenSvc   svc.TestGenIface
-	fileService  svc.FileServiceIface
+	fileService  files.FileServiceIface
 }
 
 func (fms *FormState) ReadCodeFromFile(codePath string) string {
@@ -74,8 +76,8 @@ func (fs *FormState) Clear() {
 }
 
 func NewFormState(inputs []*widget.Entry, labels []string) *FormState {
-	chatService := svc.GetChatService()
-	fileService := svc.NewFileService(reader, writer)
+	chatService := chat.GetChatService()
+	fileService := files.NewFileService(reader, writer)
 	testGenSvc := svc.NewTestGen(chatService, fileService)
 	loadingLabel := widget.NewLabel("")
 	return &FormState{

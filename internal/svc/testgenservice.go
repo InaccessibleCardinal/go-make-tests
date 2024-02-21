@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"go-make-tests/internal/colors"
+	"go-make-tests/internal/svc/chat"
+	"go-make-tests/internal/svc/files"
 	"log"
 	"strings"
 )
@@ -38,10 +40,10 @@ type TestGenIface interface {
 }
 
 type TestGen struct {
-	chatService ChatServiceIface
+	chatService chat.ChatServiceIface
 }
 
-func NewTestGen(chatService ChatServiceIface, fileService FileServiceIface) TestGenIface {
+func NewTestGen(chatService chat.ChatServiceIface, fileService files.FileServiceIface) TestGenIface {
 	return &TestGen{chatService: chatService}
 }
 

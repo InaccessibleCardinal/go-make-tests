@@ -1,9 +1,8 @@
-package svc_test
+package files
 
 import (
 	"encoding/json"
 	"errors"
-	"go-make-tests/internal/svc"
 	"io/fs"
 	"testing"
 
@@ -27,7 +26,7 @@ func (m *MockFileHandler) WriteFile(name string, data []byte, perm fs.FileMode) 
 
 func TestFileService_ReadFile(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	fileData := []byte("file content")
 	fileName := "testfile.txt"
@@ -44,7 +43,7 @@ func TestFileService_ReadFile(t *testing.T) {
 
 func TestFileService_SaveFile(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	fileContent := "file content"
 	fileName := "testfile.txt"
@@ -60,7 +59,7 @@ func TestFileService_SaveFile(t *testing.T) {
 
 func TestFileService_SaveJson(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	jsonContent := map[string]interface{}{
 		"key": "value",
@@ -80,7 +79,7 @@ func TestFileService_SaveJson(t *testing.T) {
 
 func TestFileService_SaveJson_MarshalError(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	jsonContent := make(chan int) // Unsupported type which will cause Marshal error
 	fileName := "test.json"
@@ -95,7 +94,7 @@ func TestFileService_SaveJson_MarshalError(t *testing.T) {
 
 func TestFileService_ReadFile_Error(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	fileName := "invalidfile.txt"
 	expectedError := errors.New("read file error")
@@ -112,7 +111,7 @@ func TestFileService_ReadFile_Error(t *testing.T) {
 
 func TestFileService_SaveFile_Error(t *testing.T) {
 	fileHandler := new(MockFileHandler)
-	fileService := svc.NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
+	fileService := NewFileService(fileHandler.ReadFile, fileHandler.WriteFile)
 
 	fileContent := "file content"
 	fileName := "testfile.txt"

@@ -1,5 +1,5 @@
 // Package contains services for interacting with LLMs (openai so far)
-package svc
+package chat
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type ChatServiceIface interface {
 }
 
 type ChatService struct {
-	client AIClientIface
+	client  AIClientIface
 	ctx     context.Context
 	history ChatHistoryServiceIface
 	model   string
