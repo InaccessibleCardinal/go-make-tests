@@ -1,0 +1,5 @@
+def my_func():
+  print('wut wut')
+
+def other_func():
+  return [{'a': 'bb'}]

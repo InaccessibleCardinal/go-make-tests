@@ -1,38 +1,74 @@
 package svc
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"go-make-tests/internal/colors"
 	"log"
-	"os"
 	"strings"
-
-	"github.com/sashabaranov/go-openai"
 )
 
-func AskForTest(language, framework, codeInput, outfile string) {
-	svc := getChatter()
-	prompt := getPrompt(language, framework)
-
-	svc.Prompt(prompt)
-	log.Println(colors.Blue("Asking AI..."))
-	result, err := svc.InvokeUserQuery(codeInput)
-	panicIfErr(err, "Failed AI service call")
-
-	processed := processContent(result.Content, language)
-	writeTestResult(outfile, processed)
-	resultToStdOut(processed)
+type AskForTestConfig struct {
+	Language  string
+	Framework string
+	CodeInput string
+	OutFile   string
 }
 
-func getChatter() ChatServiceIface {
-	ctx := context.Background()
-	client := openai.NewClient(os.Getenv("OPEN_AI_API_KEY"))
-	return NewChatService(ctx, client, openai.GPT3Dot5Turbo, NewChatHistoryService())
+func (a *AskForTestConfig) Set(i int, value string) {
+	if i > 3 {
+		panic(errors.New("trying to set ask for test config out of range"))
+	}
+	if i == 0 {
+		a.Language = value
+	}
+	if i == 1 {
+		a.Framework = value
+	}
+	if i == 2 {
+		a.CodeInput = value
+	}
+	if i == 3 {
+		a.OutFile = value
+	}
+}
+
+type TestGenIface interface {
+	AskForTest(AskForTestConfig) error
+}
+
+type TestGen struct {
+	chatService ChatServiceIface
+	fileService FileServiceIface
+}
+
+func NewTestGen(chatService ChatServiceIface, fileService FileServiceIface) TestGenIface {
+	return &TestGen{chatService: chatService, fileService: fileService}
+}
+
+func (tg *TestGen) AskForTest(conf AskForTestConfig) error {
+	prompt := getPrompt(conf.Language, conf.Framework)
+
+	tg.chatService.Prompt(prompt)
+	log.Println(colors.Blue("Asking AI..."))
+	result, err := tg.chatService.InvokeUserQuery(conf.CodeInput)
+
+	if err != nil {
+		return err
+	}
+
+	processed := processContent(result.Content, conf.Language)
+
+	if err := tg.fileService.SaveFile(conf.OutFile, processed); err != nil {
+		return err
+	}
+
+	resultToStdOut(processed)
+	return nil
 }
 
 func getPrompt(language, framework string) string {
-	return  fmt.Sprintf(
+	return fmt.Sprintf(
 		`You are an expert %s programmer.
 		Given the provided code, please write a unit test for it in the %s testing framework.
 		Try to achieve total code coverage.
@@ -44,18 +80,7 @@ func processContent(content, language string) string {
 	return strings.Replace(cleanedContent, "```", "", 1)
 }
 
-func writeTestResult(fileName, codeContent string) {
-	err := os.WriteFile(fileName, []byte(codeContent), 0777)
-	panicIfErr(err, "Failed to write file")
-}
-
 func resultToStdOut(result string) {
 	log.Println(colors.Green("Success"))
 	log.Println(result)
-}
-
-func panicIfErr(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", colors.Red(msg), err.Error())
-	}
 }
