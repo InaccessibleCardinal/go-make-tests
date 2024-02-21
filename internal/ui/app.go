@@ -30,37 +30,41 @@ type FormState struct {
 	fileService  svc.FileServiceIface
 }
 
-func (fs *FormState) ReadCodeFromFile(codePath string) string {
-	code, err := fs.fileService.ReadFile(codePath)
+func (fms *FormState) ReadCodeFromFile(codePath string) string {
+	code, err := fms.fileService.ReadFile(codePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return code
 }
 
-func (fs *FormState) SetLoading(value string) {
-	fs.loadingLabel.Text = value
-	fs.loadingLabel.Refresh()
+func (fms *FormState) SetLoading(value string) {
+	fms.loadingLabel.Text = value
+	fms.loadingLabel.Refresh()
 }
 
-func (fs *FormState) Submit() {
-	fs.SetLoading("Loading...")
+func (fms *FormState) Submit() {
+	fms.SetLoading("Loading...")
 	testGenConfig := svc.AskForTestConfig{}
-	for i, input := range fs.Inputs {
-		log.Printf("value for field %s: %s\n", fs.Labels[i], input.Text)
-		if fs.Labels[i] == "In File" {
-			code := fs.ReadCodeFromFile(input.Text)
+	for i, input := range fms.Inputs {
+		log.Printf("value for field %s: %s\n", fms.Labels[i], input.Text)
+		if fms.Labels[i] == "In File" {
+			code := fms.ReadCodeFromFile(input.Text)
 			testGenConfig.Set(i, code)
 		} else {
 			testGenConfig.Set(i, input.Text)
 		}
 	}
-	fs.fileService.SaveJson("sanity/sample-config.json", testGenConfig)
+	fms.fileService.SaveJson("sanity/sample-config.json", testGenConfig)
 
-	if err := fs.testGenSvc.AskForTest(testGenConfig); err != nil {
+	testResult, err := fms.testGenSvc.AskForTest(testGenConfig)
+	if err != nil {
 		log.Fatal(err)
 	}
-	fs.SetLoading("")
+	if err := fms.fileService.SaveFile(testGenConfig.OutFile, testResult); err != nil {
+		log.Fatal(err)
+	}
+	fms.SetLoading("")
 }
 
 func (fs *FormState) Clear() {
