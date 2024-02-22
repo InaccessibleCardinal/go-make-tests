@@ -1,3 +1,4 @@
 .env
 sanity
 in
+*.ts
