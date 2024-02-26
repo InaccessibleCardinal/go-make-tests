@@ -8,14 +8,14 @@ import (
 )
 
 func LoadEnv() {
+	log.Println(colors.Blue("Getting environment ready..."))
 	bts, err := os.ReadFile(".env")
 	LogFatalErr(err)
 
 	lines := strings.Split(string(bts), "\n")
-
 	for _, line := range lines {
 		parts := strings.Split(line, "=")
-		log.Println(colors.Blue("Getting environment ready..."))
+		
 		os.Setenv(parts[0], strings.TrimSpace(parts[1]))
 	}
 }
