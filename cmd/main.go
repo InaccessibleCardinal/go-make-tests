@@ -4,8 +4,8 @@ import (
 	"go-make-tests/internal/db"
 	"go-make-tests/internal/env"
 	creds "go-make-tests/internal/svc/credentials"
+	"go-make-tests/internal/ui"
 
-	// "go-make-tests/internal/ui"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,7 +16,9 @@ func init() {
 }
 
 func main() {
-	Connect()
+	// Connect()
+	ui.Run()
+
 }
 
 func Connect() {
