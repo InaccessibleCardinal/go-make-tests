@@ -1,7 +1,6 @@
 package svc
 
 import (
-	"errors"
 	"fmt"
 	"go-make-tests/internal/colors"
 	"go-make-tests/internal/svc/chat"
@@ -15,24 +14,6 @@ type AskForTestConfig struct {
 	Framework string
 	CodeInput string
 	OutFile   string
-}
-
-func (a *AskForTestConfig) Set(i int, value string) {
-	if i > 3 {
-		panic(errors.New("trying to set ask for test config out of range"))
-	}
-	if i == 0 {
-		a.Language = value
-	}
-	if i == 1 {
-		a.Framework = value
-	}
-	if i == 2 {
-		a.CodeInput = value
-	}
-	if i == 3 {
-		a.OutFile = value
-	}
 }
 
 type TestGenIface interface {

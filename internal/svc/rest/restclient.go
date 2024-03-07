@@ -15,7 +15,6 @@ func Doit() {
 type RestClient struct {
 	client  *http.Client
 	request *http.Request
-	url     string
 	err     error
 }
 
@@ -31,13 +30,8 @@ func New(clientOverride *http.Client) *RestClient {
 	return &RestClient{client: http.DefaultClient}
 }
 
-func (rc *RestClient) Url(url string) *RestClient {
-	rc.url = url
-	return rc
-}
-
-func (rc *RestClient) Get() *RestClient {
-	req, err := http.NewRequest(http.MethodGet, rc.url, nil)
+func (rc *RestClient) Get(url string) *RestClient {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		rc.err = err
 	}
@@ -45,8 +39,8 @@ func (rc *RestClient) Get() *RestClient {
 	return rc
 }
 
-func (rc *RestClient) Post(body io.Reader) *RestClient {
-	req, err := http.NewRequest(http.MethodPost, rc.url, body)
+func (rc *RestClient) Post(url string, body io.Reader) *RestClient {
+	req, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		rc.err = err
 	}
@@ -54,8 +48,8 @@ func (rc *RestClient) Post(body io.Reader) *RestClient {
 	return rc
 }
 
-func (rc *RestClient) Put(body io.Reader) *RestClient {
-	req, err := http.NewRequest(http.MethodPut, rc.url, body)
+func (rc *RestClient) Put(url string, body io.Reader) *RestClient {
+	req, err := http.NewRequest(http.MethodPut, url, body)
 	if err != nil {
 		rc.err = err
 	}
@@ -63,8 +57,8 @@ func (rc *RestClient) Put(body io.Reader) *RestClient {
 	return rc
 }
 
-func (rc *RestClient) Delete(body io.Reader) *RestClient {
-	req, err := http.NewRequest(http.MethodDelete, rc.url, body)
+func (rc *RestClient) Delete(url string, body io.Reader) *RestClient {
+	req, err := http.NewRequest(http.MethodDelete, url, body)
 	if err != nil {
 		rc.err = err
 	}

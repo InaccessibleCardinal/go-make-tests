@@ -34,7 +34,7 @@ func TestRestClient_Do(t *testing.T) {
 		rc := &RestClient{
 			client: &http.Client{Transport: &mockRoundTripper{resp: mockResp}},
 		}
-		res, err := rc.Url("http://example.com").Get().Do()
+		res, err := rc.Get("http://example.com").Do()
 
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -58,7 +58,7 @@ func TestRestClient_Do(t *testing.T) {
 	t.Run("error creating request", func(t *testing.T) {
 		rc := &RestClient{}
 		rc.err = errors.New("error creating request")
-		_, err := rc.Url("http://example.com").Get().Do()
+		_, err := rc.Get("http://example.com").Do()
 
 		if err == nil {
 			t.Error("expected an error but got nil")

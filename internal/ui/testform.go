@@ -16,13 +16,17 @@ var (
 	writer = os.WriteFile
 )
 
-func createInput(label string, entry *widget.Entry) *widget.FormItem {
+func CreateInput(label string, entry *widget.Entry) *widget.FormItem {
 	return &widget.FormItem{Text: label, Widget: entry}
 }
 
 type FormState struct {
-	FormError    error
-	Inputs       []*widget.Entry
+	FormError      error
+	languageEntry  *widget.Entry
+	frameworkEntry *widget.Entry
+	infileEntry    *widget.Entry
+	outfileEntry   *widget.Entry
+
 	Labels       []string
 	loadingLabel *widget.Label
 	testGenSvc   svc.TestGenIface
@@ -44,16 +48,13 @@ func (fms *FormState) SetLoading(value string) {
 
 func (fms *FormState) Submit() {
 	fms.SetLoading("Loading...")
-	testGenConfig := svc.AskForTestConfig{}
-	for i, input := range fms.Inputs {
-		log.Printf("value for field %s: %s\n", fms.Labels[i], input.Text)
-		if fms.Labels[i] == "In File" {
-			code := fms.ReadCodeFromFile(input.Text)
-			testGenConfig.Set(i, code)
-		} else {
-			testGenConfig.Set(i, input.Text)
-		}
+	testGenConfig := svc.AskForTestConfig{
+		Language:  fms.languageEntry.Text,
+		Framework: fms.frameworkEntry.Text,
+		CodeInput: fms.infileEntry.Text,
+		OutFile:   fms.outfileEntry.Text,
 	}
+
 	fms.fileService.SaveJson("sanity/sample-config.json", testGenConfig)
 
 	testResult, err := fms.testGenSvc.AskForTest(testGenConfig)
@@ -66,38 +67,41 @@ func (fms *FormState) Submit() {
 	fms.SetLoading("")
 }
 
-func (fs *FormState) Clear() {
-	for _, input := range fs.Inputs {
-		input.SetText("")
-	}
+func (fms *FormState) Clear() {
+	fms.languageEntry.SetText("")
+	fms.frameworkEntry.SetText("")
+	fms.infileEntry.SetText("")
+	fms.outfileEntry.SetText("")
 }
 
-func NewFormState(inputs []*widget.Entry, labels []string) *FormState {
+func NewFormState() *FormState {
 	chatService := chat.GetChatService()
 	fileService := files.NewFileService(reader, writer)
 	testGenSvc := svc.NewTestGen(chatService, fileService)
 	loadingLabel := widget.NewLabel("")
+
 	return &FormState{
-		Inputs:       inputs,
-		Labels:       labels,
-		loadingLabel: loadingLabel,
-		testGenSvc:   testGenSvc,
-		fileService:  fileService}
+		languageEntry:  widget.NewEntry(),
+		frameworkEntry: widget.NewEntry(),
+		infileEntry:    widget.NewEntry(),
+		outfileEntry:   widget.NewEntry(),
+		Labels:         labels,
+		loadingLabel:   loadingLabel,
+		testGenSvc:     testGenSvc,
+		fileService:    fileService}
 }
 
 func CreateTestForm() (*widget.Form, *FormState) {
-	var entries []*widget.Entry
-	var inputItems []*widget.FormItem
-	for _, label := range labels {
-		entry := widget.NewEntry()
-		entries = append(entries, entry)
-		inputItems = append(inputItems, createInput(label, entry))
-	}
-	formState := NewFormState(entries, labels)
+	formState := NewFormState()
 	submitFunc := func() {
 		formState.Submit()
 		formState.Clear()
 	}
-
+	inputItems := []*widget.FormItem{
+		CreateInput("Language", formState.languageEntry),
+		CreateInput("Testing Framework", formState.frameworkEntry),
+		CreateInput("In File", formState.infileEntry),
+		CreateInput("Out File", formState.outfileEntry),
+	}
 	return &widget.Form{Items: inputItems, OnSubmit: submitFunc}, formState
 }
